@@ -38,8 +38,26 @@ module Ahora
         names = names.flatten
         parser = names.pop if names.last.is_a?(Proc)
         names.each do |name|
-          element name.to_s => name.to_s.gsub(/[Oo]bject/, '').underscore, :with => parser
+          selector = name
+          if name.is_a? Hash
+            selector, name = name.first
+          end
+          element selector.to_s.camelcase(:lower) => name.to_s, :with => parser
         end
+      end
+
+      # Public: define Java style object id mapping
+      #
+      # *names - Array of String or Symbol ruby style names
+      #
+      # Examples
+      #
+      # objectid :id, parent_id
+      # # is equivalent to
+      # element 'objectId'
+      # element 'parentObjectId'
+      def objectid(*names)
+        attribute names.map { |name| { name.to_s.gsub('id', 'object_id') => name } }, INTEGER_PARSER
       end
 
       def string(*names)
@@ -77,14 +95,14 @@ if __FILE__== $0
     extend Ahora::Resource
 
     class PostMapper < Ahora::Representation
-      integer 'objectId'
-      integer 'userObjectId'
-      date 'createdAt'
-      element 'body'
-      integer 'parentObjectId'
+      objectid :id
+      objectid :user_id
+      date  :created_at
+      element :body
+      objectid :parent_id
       element 'user', :with => Class.new(Ahora::Representation) do
-        string 'firstName'
-        string 'lastName'
+        string :first_name
+        string :last_name
       end
       elements 'replies/userPost' => :replies, :with => PostMapper
     end
