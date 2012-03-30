@@ -95,14 +95,11 @@ if __FILE__== $0
     extend Ahora::Resource
 
     class PostMapper < Ahora::Representation
-      objectid :id
-      objectid :user_id
+      objectid :id, :user_id, :parent_id
       date  :created_at
       element :body
-      objectid :parent_id
       element 'user', :with => Class.new(Ahora::Representation) do
-        string :first_name
-        string :last_name
+        string :first_name, :last_name
       end
       elements 'replies/userPost' => :replies, :with => PostMapper
     end
