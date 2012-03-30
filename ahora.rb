@@ -54,8 +54,8 @@ module Ahora
       #
       # objectid :id, parent_id
       # # is equivalent to
-      # element 'objectId'
-      # element 'parentObjectId'
+      # element 'objectId' => 'id'
+      # element 'parentObjectId' => 'parent_id'
       def objectid(*names)
         attribute names.map { |name| { name.to_s.gsub('id', 'object_id') => name } }, INTEGER_PARSER
       end
