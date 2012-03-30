@@ -2,7 +2,7 @@ require 'nibbler'
 require 'faraday'
 require 'nokogiri'
 require 'date'
-
+require 'active_support/core_ext/string'
 
 module Ahora
   module Resource
@@ -30,19 +30,15 @@ module Ahora
   end
 
   class Representation < Nibbler
-    def self.blank?(content)
-      respond_to?(:empty?) ? empty? : !self
-    end
-
-    INTEGER_PARSER = lambda { |node| Integer(node.content) if !blank?(node.content) }
-    DATE_PARSER = lambda { |node| Date.parse(node.content) if !blank?(node.content) }
+    INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
+    DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
 
     module Definition
       def attribute(*names)
         names = names.flatten
         parser = names.pop if names.last.is_a?(Proc)
         names.each do |name|
-          element name.to_s => underscore(name.to_s.gsub(/[Oo]bject/, '')), :with => parser
+          element name.to_s => name.to_s.gsub(/[Oo]bject/, '').underscore, :with => parser
         end
       end
 
@@ -56,29 +52,6 @@ module Ahora
 
       def date(*names)
         attribute(names, DATE_PARSER)
-      end
-
-      private
-      # Makes an underscored, lowercase form from the expression in the string.
-      #
-      # Changes '::' to '/' to convert namespaces to paths.
-      #
-      # Examples:
-      #   "ActiveRecord".underscore         # => "active_record"
-      #   "ActiveRecord::Errors".underscore # => active_record/errors
-      #
-      # As a rule of thumb you can think of +underscore+ as the inverse of +camelize+,
-      # though there are cases where that does not hold:
-      #
-      #   "SSLError".underscore.camelize # => "SslError"
-      def underscore(camel_cased_word)
-        word = camel_cased_word.to_s.dup
-        word.gsub!(/::/, '/')
-        word.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
-        word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
-        word.tr!("-", "_")
-        word.downcase!
-        word
       end
     end
 
