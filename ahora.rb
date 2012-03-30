@@ -3,27 +3,30 @@ require 'faraday'
 require 'nokogiri'
 require 'date'
 
-module IoClient
-  IO_CONNECT_USERNAME = 'user'
-  IO_CONNECT_PASSWORD = 'pass'
-  IO_CONNECT_URL      = 'http://test.net/'
 
-  def get(mapper, url, params = {})
-    response = connection.get do |req|
-      req.url url, params
-    end
-    doc = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
-    mapper.parse(doc).object
-  end
+module Ahora
+  module Resource
+    USERNAME = 'user'
+    PASSWORD = 'pass'
+    HOST      = 'http://test.net/'
 
-  def connection
-    conn = Faraday.new(IO_CONNECT_URL, :ssl => { :verify => false }) do |builder|
-      builder.use Faraday::Request::BasicAuthentication, IO_CONNECT_USERNAME, IO_CONNECT_PASSWORD
-      builder.use Faraday::Response::RaiseError
-      builder.adapter Faraday.default_adapter
+    def get(mapper, url, params = {})
+      response = connection.get do |req|
+        req.url url, params
+      end
+      doc = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+      mapper.parse(doc).object
     end
-    conn.headers['User-Agent'] = 'Ons Medewerkerportaal'
-    conn
+
+    def connection
+      conn = Faraday.new(HOST, :ssl => { :verify => false }) do |builder|
+        builder.use Faraday::Request::BasicAuthentication, USERNAME, PASSWORD
+        builder.use Faraday::Response::RaiseError
+        builder.adapter Faraday.default_adapter
+      end
+      conn.headers['User-Agent'] = 'Ahora'
+      conn
+    end
   end
 
   class Representation < Nibbler
@@ -83,6 +86,7 @@ module IoClient
   end
 end
 
+
 ## specs
 
 if __FILE__== $0
@@ -97,15 +101,15 @@ if __FILE__== $0
   end
 
   class Post
-    extend IoClient
+    extend Ahora::Resource
 
-    class PostMapper < IoClient::Representation
+    class PostMapper < Ahora::Representation
       integer 'objectId'
       integer 'userObjectId'
       date 'createdAt'
       element 'body'
       integer 'parentObjectId'
-      element 'user', :with => Class.new(IoClient::Representation) do
+      element 'user', :with => Class.new(Ahora::Representation) do
         string 'firstName'
         string 'lastName'
       end
@@ -213,5 +217,3 @@ __END__
     </replies>
   </userPost>
 </userPosts>
-
-
