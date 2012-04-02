@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<userPosts type="array">
+  <userPost>
+    <objectId>1</objectId>
+    <userObjectId>1</userObjectId>
+    <user>
+      <firstName>John</firstName>
+      <lastName>Doe</lastName>
+    </user>
+    <body>How is everybody today?</body>
+    <createdAt>2011-10-26T17:01:52+02:00</createdAt>
+
+    <replies type="array">
+      <userPost>
+        <objectId>2</objectId>
+        <parentObjectId>1</parentObjectId>
+        <userObjectId>2</userObjectId>
+        <user>
+          <firstName>Mike</firstName>
+          <lastName>Smith</lastName>
+        </user>
+        <body>I am fine, thanks for asking.</body>
+        <createdAt>2011-10-27T9:00:00+02:00</createdAt>
+      </userPost>
+      <userPost>
+        <objectId>3</objectId>
+        <parentObjectId>1</parentObjectId>
+        <userObjectId>1</userObjectId>
+        <user>
+          <firstName>John</firstName>
+          <lastName>Doe</lastName>
+        </user>
+        <body>You are more than welcome.</body>
+        <createdAt>2011-10-27T9:00:00+02:00</createdAt>
+      </userPost>
+    </replies>
+  </userPost>
+</userPosts>
