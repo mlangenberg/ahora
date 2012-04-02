@@ -10,12 +10,11 @@ module Ahora
     PASSWORD = 'pass'
     HOST      = 'http://test.net/'
 
-    def get(mapper, url, params = {})
+    def get(url, params = {})
       response = connection.get do |req|
         req.url url, params
       end
-      doc = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
-      mapper.parse(doc).object
+      response
     end
 
     def connection
@@ -32,6 +31,20 @@ module Ahora
   class Representation < Nibbler
     INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
     DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
+
+    def self.doc(response)
+       Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+    end
+
+    def self.collection(response)
+      doc(response).search("/*[@type='array']/*").map do |element|
+        member element
+      end
+    end
+
+    def self.member(document)
+      self.parse(document)
+    end
 
     module Definition
       def attribute(*names)
@@ -91,27 +104,21 @@ if __FILE__== $0
     FakeWeb.register_uri :get, 'http://user:pass@test.net' + uri, :body => body
   end
 
-  class Post
+  class Post < Ahora::Representation
     extend Ahora::Resource
 
-    class PostMapper < Ahora::Representation
-      objectid :id, :user_id, :parent_id
-      date  :created_at
-      element :body
-      element 'user', :with => Class.new(Ahora::Representation) do
-        string :first_name, :last_name
-      end
-      elements 'replies/userPost' => :replies, :with => PostMapper
+    objectid :id, :user_id, :parent_id
+    date  :created_at
+    element :body
+    element 'user', :with => Ahora::Representation do
+      string :first_name, :last_name
     end
+    elements 'replies/userPost' => :replies, :with => Post
 
-    class PostsMapper < Nibbler
-      elements '/userPosts/userPost' => :object, :with => PostMapper
-    end
-
-    # TODO test with limit/offset params
     def self.find_by_user_id(id)
-      get PostsMapper,"/users/#{id}/posts.xml"
+      collection get "/users/#{id}/posts.xml"
     end
+
   end
 
 
