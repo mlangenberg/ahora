@@ -1,6 +1,7 @@
 
 require 'fakeweb'
 require 'minitest/autorun'
+require 'minitest/pride'
 require_relative '../lib/ahora'
 
 FakeWeb.allow_net_connect = false
@@ -72,6 +73,5 @@ describe "requesting a collection" do
         reply.user.last_name.must_equal "Smith"
       end
     end
-
   end
 end
