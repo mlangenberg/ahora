@@ -2,7 +2,7 @@ require 'nibbler'
 require 'nokogiri'
 require 'date'
 require 'active_support/core_ext/string'
-
+require 'delegate'
 
 module Ahora
   class Representation < Nibbler
@@ -14,9 +14,9 @@ module Ahora
     end
 
     def self.collection(response)
-      doc(response).search("/*[@type='array']/*").map do |element|
+      Collection.new doc(response).search("/*[@type='array']/*").map { |element|
         member element
-      end
+      }.to_a, response
     end
 
     def self.member(document)
@@ -64,5 +64,13 @@ module Ahora
     end
 
     extend Definition
+  end
+
+  class Collection < DelegateClass(Array)
+    attr_reader :cache_key
+    def initialize(members, response)
+      @cache_key = response.env[:url].to_s
+      super(members)
+    end
   end
 end
