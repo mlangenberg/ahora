@@ -7,9 +7,16 @@ require_relative '../lib/ahora'
 FakeWeb.allow_net_connect = false
 
 
-def fake_http(uri, fixture)
-  fixture = File.join(File.dirname('__FILE__'), 'test', 'fixtures', "#{fixture}.xml")
-  FakeWeb.register_uri :get, 'http://user:pass@test.net' + uri, :body => File.open(fixture)
+def fake_http(path, body)
+  FakeWeb.register_uri :get, uri(path), :body => body
+end
+
+def uri(path)
+  'http://user:pass@test.net' + path
+end
+
+def fixture(name)
+  File.open File.join(File.dirname('__FILE__'), 'test', 'fixtures', "#{name}.xml")
 end
 
 class Post < Ahora::Representation
@@ -31,7 +38,7 @@ end
 
 describe "requesting a collection" do
   before do
-    fake_http '/users/1/posts.xml', 'user_posts'
+    fake_http '/users/1/posts.xml', fixture('user_posts')
     @posts = Post.find_by_user_id(1)
   end
 
@@ -77,5 +84,36 @@ describe "requesting a collection" do
         reply.user.last_name.must_equal "Smith"
       end
     end
+  end
+end
+
+describe 'requesting a collection with if-modified-since support' do
+  before do
+    FakeWeb.register_uri :get, uri('/users/1/posts.xml'), [
+      { :body => fixture('user_posts'), 'Last-Modified' => 'Mon, 02 Apr 2012 15:20:41 GMT' },
+      { :body => nil, :status => [304, 'Not Modified'] }
+    ]
+  end
+
+  it "caches when response header includes Last-Modified" do
+    Post.find_by_user_id(1).size.must_equal(1)
+    @posts = Post.find_by_user_id(1).size.must_equal(1)
+  end
+end
+
+# FIXME should not be class-level
+describe 'lazy loading' do
+  before do
+    @parser = Post.document_parser
+  end
+
+  it "should not parse the response if not necessary" do
+    Post.document_parser = -> body { raise('NotLazyEnough') }
+    fake_http '/users/1/posts.xml', fixture('user_posts')
+    @posts = Post.find_by_user_id(1)
+  end
+
+  after do
+    Post.document_parser = @parser
   end
 end

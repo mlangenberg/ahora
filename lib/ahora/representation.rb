@@ -5,23 +5,27 @@ require 'active_support/core_ext/string'
 require 'delegate'
 
 module Ahora
+  # TODO move parse bits to a instantiable class
   class Representation < Nibbler
     INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
     DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
 
-    def self.doc(response)
-       Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+    class << self
+      def document_parser=(parser)
+        @document_parser = parser
+      end
+      def document_parser
+        @document_parser || XmlParser.method(:parse)
+      end
     end
 
     def self.collection(response)
-      Collection.new doc(response).search("/*[@type='array']/*").map { |element|
-        member element
-      }.to_a, response
+      Collection.new self, document_parser, response
     end
 
-    def self.member(document)
-      self.parse(document)
-    end
+    # def self.member(document)
+    #   self.parse(document)
+    # end
 
     module Definition
       def attribute(*names)
@@ -45,7 +49,7 @@ module Ahora
       # objectid :id, parent_id
       # # is equivalent to
       # element 'objectId' => 'id'
-      # element 'parentObjectId' => 'parent_id'
+      # element 'parentObjectId' => 'parent_id'`az
       def objectid(*names)
         attribute names.map { |name| { name.to_s.gsub('id', 'object_id') => name } }, INTEGER_PARSER
       end
@@ -68,9 +72,57 @@ module Ahora
 
   class Collection < DelegateClass(Array)
     attr_reader :cache_key
-    def initialize(members, response)
+    def initialize(klass, document_parser, response)
+      @klass = klass
+      @document_parser = document_parser
+      @response = response
       @cache_key = response.env[:url].to_s
-      super(members)
+      super([])
+    end
+
+    def size
+      kicker
+      super
+    end
+
+    def each(*)
+      kicker
+      super
+    end
+
+    def first
+      kicker
+      super
+    end
+
+    def last
+      kicker
+      super
+    end
+
+    def [](*)
+      kicker
+      super
+    end
+
+    private
+    def kicker
+      __setobj__ doc.search("/*[@type='array']/*").map { |element|
+        @klass.parse element
+      }.to_a
+    end
+
+    def doc
+      @document_parser.call(@response.body)
+    end
+  end
+
+  class Parser
+  end
+
+  class XmlParser
+    def self.parse(body)
+      Nokogiri::XML.parse(body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
     end
   end
 end
