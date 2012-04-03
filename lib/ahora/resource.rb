@@ -1,28 +1,8 @@
 require 'faraday'
 
-require 'singleton'
-class MemCache
-  include Singleton
-  def initialize
-    @store = {}
-  end
-
-  def read(key)
-    @store[key]
-  end
-
-  def write(key, value, options = {})
-    @store[key] = value
-  end
-end
-
-
-
 module Ahora
   module Resource
-    USERNAME = 'user'
-    PASSWORD = 'pass'
-    HOST      = 'http://test.net/'
+    attr_writer :document_parser
 
     def get(url, params = {})
       response = connection.get do |req|
@@ -32,14 +12,25 @@ module Ahora
     end
 
     def connection
-      conn = Faraday.new(HOST, :ssl => { :verify => false }) do |builder|
-        builder.use Faraday::Request::BasicAuthentication, USERNAME, PASSWORD
+      conn = Faraday.new(host, :ssl => { :verify => false }) do |builder|
         builder.use Faraday::Response::RaiseError
-        builder.use LastModifiedCaching, MemCache.instance # TODO Pluggable per resource
+        extend_middleware(builder)
         builder.adapter Faraday.default_adapter
       end
       conn.headers['User-Agent'] = 'Ahora'
       conn
+    end
+
+    # @abstract override to use custom Faraday middleware
+    def extend_middleware; end;
+
+    def collection(klass, response)
+      Collection.new klass, document_parser, response
+    end
+
+    private
+    def document_parser
+      @document_parser ||= XmlParser.method(:parse)
     end
   end
 

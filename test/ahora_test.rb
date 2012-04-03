@@ -19,9 +19,42 @@ def fixture(name)
   File.open File.join(File.dirname('__FILE__'), 'test', 'fixtures', "#{name}.xml")
 end
 
-class Post < Ahora::Representation
-  extend Ahora::Resource
+require 'singleton'
+class MemCache
+  include Singleton
+  def initialize
+    @store = {}
+  end
 
+  def read(key)
+    @store[key]
+  end
+
+  def write(key, value, options = {})
+    @store[key] = value
+  end
+end
+
+class PostRepository
+  include Ahora::Resource
+  USERNAME = 'user'
+  PASSWORD = 'pass'
+
+  def find_by_user_id(id)
+    collection Post, get("/users/#{id}/posts.xml")
+  end
+
+  def extend_middleware(builder)
+    builder.use Faraday::Request::BasicAuthentication, USERNAME, PASSWORD
+    builder.use Ahora::LastModifiedCaching, MemCache.instance
+  end
+
+  def host
+    'http://test.net/'
+  end
+end
+
+class Post < Ahora::Representation
   objectid :id, :user_id, :parent_id
   date  :created_at
   element :body
@@ -29,17 +62,13 @@ class Post < Ahora::Representation
     string :first_name, :last_name
   end
   elements 'replies/userPost' => :replies, :with => Post
-
-  def self.find_by_user_id(id)
-    collection get "/users/#{id}/posts.xml"
-  end
 end
 
 
 describe "requesting a collection" do
   before do
     fake_http '/users/1/posts.xml', fixture('user_posts')
-    @posts = Post.find_by_user_id(1)
+    @posts = PostRepository.new.find_by_user_id(1)
   end
 
   it "has the right size" do
@@ -93,27 +122,30 @@ describe 'requesting a collection with if-modified-since support' do
       { :body => fixture('user_posts'), 'Last-Modified' => 'Mon, 02 Apr 2012 15:20:41 GMT' },
       { :body => nil, :status => [304, 'Not Modified'] }
     ]
+    @repository = PostRepository.new
   end
 
   it "caches when response header includes Last-Modified" do
-    Post.find_by_user_id(1).size.must_equal(1)
-    @posts = Post.find_by_user_id(1).size.must_equal(1)
+    @repository.find_by_user_id(1).size.must_equal(1)
+    @posts = @repository.find_by_user_id(1).size.must_equal(1)
   end
 end
 
-# FIXME should not be class-level
 describe 'lazy loading' do
   before do
-    @parser = Post.document_parser
+    @repository = PostRepository.new
+    @repository.document_parser = -> body { raise('NotLazyEnough') }
   end
 
   it "should not parse the response if not necessary" do
-    Post.document_parser = -> body { raise('NotLazyEnough') }
     fake_http '/users/1/posts.xml', fixture('user_posts')
-    @posts = Post.find_by_user_id(1)
+    @posts = PostRepository.new.find_by_user_id(1)
   end
+end
 
-  after do
-    Post.document_parser = @parser
+describe "creating a new instance" do
+  it "allows to create a new instance with an attribute hash" do
+    p = Post.new :body => 'hi'
+    p.body.must_equal 'hi'
   end
 end

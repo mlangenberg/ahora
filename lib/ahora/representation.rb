@@ -10,23 +10,6 @@ module Ahora
     INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
     DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
 
-    class << self
-      def document_parser=(parser)
-        @document_parser = parser
-      end
-      def document_parser
-        @document_parser || XmlParser.method(:parse)
-      end
-    end
-
-    def self.collection(response)
-      Collection.new self, document_parser, response
-    end
-
-    # def self.member(document)
-    #   self.parse(document)
-    # end
-
     module Definition
       def attribute(*names)
         names = names.flatten
@@ -68,6 +51,17 @@ module Ahora
     end
 
     extend Definition
+
+    def initialize(doc_or_atts = {})
+      if doc_or_atts.is_a? Hash
+        super(nil)
+        doc_or_atts.each do |key, val|
+          send("#{key}=", val)
+        end
+      else
+        super
+      end
+    end
   end
 
   class Collection < DelegateClass(Array)
@@ -115,9 +109,6 @@ module Ahora
     def doc
       @document_parser.call(@response.body)
     end
-  end
-
-  class Parser
   end
 
   class XmlParser
