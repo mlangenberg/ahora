@@ -22,10 +22,19 @@ module Ahora
     end
 
     # @abstract override to use custom Faraday middleware
-    def extend_middleware; end;
+    def extend_middleware(builder); end;
 
-    def collection(klass, response)
-      Collection.new klass, document_parser, response
+    def collection(*args, &block)
+      if args.size == 2
+        klass, response = args
+        instantiator = lambda do |doc|
+          klass.parse(doc)
+        end
+      else
+        response = args.first
+        instantiator = block
+      end
+      Collection.new instantiator, document_parser, response
     end
 
     private

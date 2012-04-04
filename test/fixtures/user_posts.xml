@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <userPosts type="array">
   <userPost>
+	<hidden>false</hidden>
     <objectId>1</objectId>
     <userObjectId>1</userObjectId>
     <user>
@@ -34,5 +35,8 @@
         <createdAt>2011-10-27T9:00:00+02:00</createdAt>
       </userPost>
     </replies>
+  </userPost>
+  <userPost>
+    <hidden>true</hidden>
   </userPost>
 </userPosts>

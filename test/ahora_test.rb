@@ -61,9 +61,40 @@ class Post < Ahora::Representation
   element 'user', :with => Ahora::Representation do
     string :first_name, :last_name
   end
+  boolean :hidden
   elements 'replies/userPost' => :replies, :with => Post
 end
 
+class PostDomainRepository < PostRepository
+  def find_by_user_id(id)
+    collection PostDomain, get("/users/#{id}/posts.xml")
+  end
+end
+
+class PostDomain < DelegateClass(Post)
+  def self.parse(doc)
+    post = Post.parse(doc)
+    post.hidden ? nil : new(post)
+  end
+
+  def initialize(post)
+    super(post)
+  end
+
+  def published?
+    created_at < Date.today
+  end
+end
+
+class BlogPostRepository < PostRepository
+  include Ahora::Resource
+
+  def all
+    collection get("/users/1/posts.xml") do |doc|
+      Post.parse(doc)
+    end
+  end
+end
 
 describe "requesting a collection" do
   before do
@@ -72,7 +103,7 @@ describe "requesting a collection" do
   end
 
   it "has the right size" do
-    @posts.size.must_equal 1
+    @posts.size.must_equal 2
   end
 
   it "has a cache key" do
@@ -84,6 +115,10 @@ describe "requesting a collection" do
 
     it "has the right body" do
       subject.body.must_equal "How is everybody today?"
+    end
+
+    it "generates a questionmark method" do
+      subject.body?.must_equal true
     end
 
     it "renames foreign element names and converts integers" do
@@ -126,8 +161,8 @@ describe 'requesting a collection with if-modified-since support' do
   end
 
   it "caches when response header includes Last-Modified" do
-    @repository.find_by_user_id(1).size.must_equal(1)
-    @posts = @repository.find_by_user_id(1).size.must_equal(1)
+    @repository.find_by_user_id(1).size.must_equal(2)
+    @posts = @repository.find_by_user_id(1).size.must_equal(2)
   end
 end
 
@@ -141,11 +176,41 @@ describe 'lazy loading' do
     fake_http '/users/1/posts.xml', fixture('user_posts')
     @posts = PostRepository.new.find_by_user_id(1)
   end
+
+  it "should work the same for domain layer type models" do
+    fake_http '/users/1/posts.xml', fixture('user_posts')
+    PostDomainRepository.new.find_by_user_id(1)
+  end
 end
 
 describe "creating a new instance" do
   it "allows to create a new instance with an attribute hash" do
     p = Post.new :body => 'hi'
     p.body.must_equal 'hi'
+  end
+end
+
+describe "being wrapped by a domain layer" do
+  before do
+    fake_http '/users/1/posts.xml', fixture('user_posts')
+    @posts = PostDomainRepository.new.find_by_user_id(1)
+    @post = @posts.first
+  end
+
+  it "handles a collection" do
+    @post.published?.must_equal true
+    @post.user.first_name.must_equal 'John'
+  end
+
+  it "allows filtering by letting the instantiator return nil" do
+    @posts.size.must_equal 1
+  end
+end
+
+describe "passing a block instead of a class to collection" do
+  it "returns the parsed document" do
+    fake_http '/users/1/posts.xml', fixture('user_posts')
+    repository = BlogPostRepository.new
+    repository.all.first.id.must_equal 1
   end
 end
