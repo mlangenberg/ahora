@@ -2,22 +2,10 @@
 require 'fakeweb'
 require 'minitest/autorun'
 require 'minitest/pride'
+require_relative 'test_helper'
 require_relative '../lib/ahora'
 
 FakeWeb.allow_net_connect = false
-
-
-def fake_http(path, body)
-  FakeWeb.register_uri :get, uri(path), :body => body
-end
-
-def uri(path)
-  'http://user:pass@test.net' + path
-end
-
-def fixture(name)
-  File.open File.join(File.dirname('__FILE__'), 'test', 'fixtures', "#{name}.xml")
-end
 
 require 'singleton'
 class MemCache
@@ -74,7 +62,7 @@ end
 class PostDomain < DelegateClass(Post)
   def self.parse(doc)
     post = Post.parse(doc)
-    post.hidden ? nil : new(post)
+    post.hidden? ? nil : new(post)
   end
 
   def initialize(post)

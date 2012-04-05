@@ -10,15 +10,16 @@ module Ahora
     INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
     DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
     TIME_PARSER = lambda { |node| Time.parse(node.content) if node.content.present? } # TEST
-    BOOL_PARSER = lambda { |node| node.content.to_s.downcase == 'true' if node.content.present? } # TEST
+    BOOL_PARSER =
+        lambda { |node| node.content.to_s.downcase == 'true' if node.content.present? }
 
     module Definition
       def element(*)
-        name = super
-        define_method name.to_s+'?' do
-          !!name
+        super.tap do |name|
+          define_method "#{name}?" do
+            !!instance_variable_get("@#{name}")
+          end
         end
-        name
       end
 
       def attribute(*names)
