@@ -84,14 +84,18 @@ module Ahora
   end
 
   class Collection < DelegateClass(Array)
-    attr_reader :cache_key
+    NoCacheKeyAvailable = Class.new(StandardError)
     def initialize(instantiator, document_parser, response)
       @instantiator = instantiator
       @document_parser = document_parser
       @response = response
-      #binding.pry
-      @cache_key = response.env[:cache_key].to_s
+      @cache_key = response.env[:cache_key]
       super([])
+    end
+
+    def cache_key
+      @cache_key or raise NoCacheKeyAvailable,
+          "No caching middleware is used or resource does not support caching."
     end
 
     %w( to_s to_a size each first last [] inspect pretty_print ).each do |method_name|

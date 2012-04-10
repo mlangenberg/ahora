@@ -94,9 +94,8 @@ describe "requesting a collection" do
     @posts.size.must_equal 2
   end
 
-  it "has a randomized cache key, because the backend does not has support for it" do
-    skip("Not implemented.")
-    @posts.cache_key.must_not_equal 'http://test.net/users/1/posts.xml'
+  it "raises on #cache_key, because the backend does not has support for it" do
+    -> { @posts.cache_key }.must_raise(Ahora::Collection::NoCacheKeyAvailable)
   end
 
   describe "a single post from the collection" do
