@@ -34,7 +34,7 @@ class PostRepository
 
   def extend_middleware(builder)
     builder.use Faraday::Request::BasicAuthentication, USERNAME, PASSWORD
-    builder.use Ahora::LastModifiedCaching, MemCache.instance
+    builder.use Ahora::Middleware::LastModifiedCaching, MemCache.instance
   end
 
   def host
