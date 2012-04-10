@@ -13,6 +13,9 @@ module Ahora
       #           :ignore_params - String name or Array names of query params
       #                            that should be ignored when forming the cache
       #                            key (default: []).
+      #           :cache_header  - String name of response header that should be
+      #                            used to retrieve cache timestamp from.
+      #                            Defaults to 'last-modified'
       #
       # Yields if no cache is given. The block should return a cache object.
       def initialize(app, cache = nil, options = {})
@@ -28,15 +31,16 @@ module Ahora
           timestamp_key = cache_key(env) + ':timestamp'
           data_key      = cache_key(env) + ':response'
 
-          if date = cache.read(timestamp_key) # WARN FakeWeb cannot test this
-            env[:request_headers]['if-modified-since'] = date
+          if date = cache.read(timestamp_key)
+            # WARN FakeWeb cannot test this
+            env[:request_headers]['If-Modified-Since'] = Time.parse(date).httpdate
           end
 
           response = @app.call(env)
 
           if response.status == 304
             response = cache.read data_key
-          elsif date = response.headers['last-modified']
+          elsif date = response.headers[@options[:cache_header] || 'last-modified']
             cache.write timestamp_key, date
             cache.write data_key, response
           end
@@ -55,7 +59,7 @@ module Ahora
           url.query = build_query params
         end
         url.normalize!
-        url.request_uri
+        url.to_s
       end
 
       def params_to_ignore
