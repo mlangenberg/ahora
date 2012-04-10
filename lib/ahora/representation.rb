@@ -15,11 +15,11 @@ module Ahora
 
     module Definition
       def element(*)
-        super.tap do |name|
-          define_method "#{name}?" do
-            !!instance_variable_get("@#{name}")
-          end
+        name = super
+        define_method "#{name}?" do
+          !!instance_variable_get("@#{name}")
         end
+        name
       end
 
       def attribute(*names)
@@ -93,34 +93,13 @@ module Ahora
       super([])
     end
 
-    def size
-      kicker
-      super
-    end
-
-    def each(*)
-      kicker
-      super
-    end
-
-    def first
-      kicker
-      super
-    end
-
-    def last
-      kicker
-      super
-    end
-
-    def [](*)
-      kicker
-      super
+    %w( to_s to_a size each first last [] inspect pretty_print ).each do |method_name|
+      eval "def #{method_name}(*); kicker; super; end"
     end
 
     private
     def kicker
-      __setobj__ doc.search("/*[@type='array']/*").map { |element|
+      @_collection ||= __setobj__ doc.search("/*[@type='array']/*").map { |element|
         @instantiator.call element
       }.to_a.compact
     end
