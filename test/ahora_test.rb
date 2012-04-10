@@ -15,11 +15,11 @@ class MemCache
   end
 
   def read(key)
-    @store[key]
+    @store[key] ? Marshal.load(@store[key]) : nil
   end
 
   def write(key, value, options = {})
-    @store[key] = value
+    @store[key] = Marshal.dump(value)
   end
 end
 
@@ -152,6 +152,11 @@ describe 'requesting a collection with if-modified-since support' do
     @posts = @repository.find_by_user_id(1)
     @posts.cache_key.
         must_equal 'http://test.net/users/1/posts.xml:fragment_Mon, 02 Apr 2012 15:20:41 GMT'
+  end
+
+  it "has a cache key for cached response" do
+    @repository.find_by_user_id(1).cache_key.
+        must_equal @repository.find_by_user_id(1).cache_key
   end
 
   it "caches when response header includes Last-Modified" do

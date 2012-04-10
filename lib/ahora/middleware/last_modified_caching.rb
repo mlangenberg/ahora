@@ -42,7 +42,6 @@ module Ahora
             response = cache.read data_key
           elsif date = response.headers[@options[:cache_header] || 'Last-Modified']
             response.env[:cache_key] = fragment_cache_key(env, date)
-            #binding.pry
             cache.write timestamp_key, date
             cache.write data_key, response
           end
