@@ -94,8 +94,9 @@ describe "requesting a collection" do
     @posts.size.must_equal 2
   end
 
-  it "has a cache key" do
-    @posts.cache_key.must_equal 'http://test.net/users/1/posts.xml'
+  it "has a randomized cache key, because the backend does not has support for it" do
+    skip("Not implemented.")
+    @posts.cache_key.must_not_equal 'http://test.net/users/1/posts.xml'
   end
 
   describe "a single post from the collection" do
@@ -146,6 +147,12 @@ describe 'requesting a collection with if-modified-since support' do
       { :body => nil, :status => [304, 'Not Modified'] }
     ]
     @repository = PostRepository.new
+  end
+
+  it "has a cache key" do
+    @posts = @repository.find_by_user_id(1)
+    @posts.cache_key.
+        must_equal 'http://test.net/users/1/posts.xml:fragment_Mon, 02 Apr 2012 15:20:41 GMT'
   end
 
   it "caches when response header includes Last-Modified" do

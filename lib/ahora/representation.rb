@@ -89,7 +89,8 @@ module Ahora
       @instantiator = instantiator
       @document_parser = document_parser
       @response = response
-      @cache_key = response.env[:url].to_s
+      #binding.pry
+      @cache_key = response.env[:cache_key].to_s
       super([])
     end
 
