@@ -5,11 +5,10 @@ require 'active_support/core_ext/string'
 require 'delegate'
 
 module Ahora
-  # TODO move parse bits to a instantiable class
   class Representation < Nibbler
     INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
     DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
-    TIME_PARSER = lambda { |node| Time.parse(node.content) if node.content.present? } # TEST
+    TIME_PARSER = lambda { |node| Time.parse(node.content) if node.content.present? }
     BOOL_PARSER =
         lambda { |node| node.content.to_s.downcase == 'true' if node.content.present? }
 
@@ -43,7 +42,7 @@ module Ahora
       # objectid :id, parent_id
       # # is equivalent to
       # element 'objectId' => 'id'
-      # element 'parentObjectId' => 'parent_id'`az
+      # element 'parentObjectId' => 'parent_id'
       def objectid(*names)
         attribute names.map { |name| { name.to_s.gsub('id', 'object_id') => name } }, INTEGER_PARSER
       end
@@ -64,6 +63,7 @@ module Ahora
       def time(*names)
         attribute(names, TIME_PARSER)
       end
+      
       def boolean(*names)
         attribute(names, BOOL_PARSER)
       end

@@ -9,12 +9,12 @@ Gem::Specification.new do |s|
   s.authors     = ["Matthijs Langenberg"]
   s.email       = ["matthijs.langenberg@nedap.com"]
   s.homepage    = ""
-  s.summary     = %q{}
+  s.summary     = %q{Consume Java-ish XML HTTP Resources easily}
   s.description = %q{Consume Java-ish XML HTTP Resources easily}
 
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.test_files    = `git ls-files -- {test}/*`.split("\n")
+  #s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
   s.add_dependency "nibbler", '>= 1.3.0'

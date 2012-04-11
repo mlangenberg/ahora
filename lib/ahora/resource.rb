@@ -11,7 +11,7 @@ module Ahora
       end
     end
 
-    # TOOD test
+    # FIXME test
     def post(url, body)
       connection.post do |req|
         set_common_headers(req)
@@ -20,7 +20,7 @@ module Ahora
       end
     end
 
-    # TOOD test
+    # FIXME test
     def put(url, body)
       connection.put do |req|
         set_common_headers(req)

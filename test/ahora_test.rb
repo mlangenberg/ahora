@@ -1,4 +1,3 @@
-
 require 'fakeweb'
 require 'minitest/autorun'
 require 'minitest/pride'
