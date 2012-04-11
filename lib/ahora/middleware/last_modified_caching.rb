@@ -16,6 +16,8 @@ module Ahora
       #           :cache_header  - String name of response header that should be
       #                            used to retrieve cache timestamp from.
       #                            Defaults to 'last-modified'
+      #           :expire_in     - Integer time to live value in seconds for a key.
+      #                            Defaults to never expire.
       #
       # Yields if no cache is given. The block should return a cache object.
       def initialize(app, cache = nil, options = {})
@@ -42,8 +44,8 @@ module Ahora
             response = cache.read data_key
           elsif date = response.headers[@options[:cache_header] || 'Last-Modified']
             response.env[:response_headers]['X-Ahora-Cache-Key'] = fragment_cache_key(env, date)
-            cache.write timestamp_key, date
-            cache.write data_key, response
+            cache.write timestamp_key, date, :expire_in => @options[:expire_in]
+            cache.write data_key, response, :expire_in => @options[:expire_in]
           end
 
           finalize_response(response, env)
