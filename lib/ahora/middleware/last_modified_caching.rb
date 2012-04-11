@@ -41,7 +41,7 @@ module Ahora
           if response.status == 304
             response = cache.read data_key
           elsif date = response.headers[@options[:cache_header] || 'Last-Modified']
-            response.env[:cache_key] = fragment_cache_key(env, date)
+            response.env[:response_headers]['X-Ahora-Cache-Key'] = fragment_cache_key(env, date)
             cache.write timestamp_key, date
             cache.write data_key, response
           end

@@ -89,7 +89,7 @@ module Ahora
       @instantiator = instantiator
       @document_parser = document_parser
       @response = response
-      @cache_key = response.env[:cache_key]
+      @cache_key = response.env[:response_headers]['X-Ahora-Cache-Key']
       super([])
     end
 
