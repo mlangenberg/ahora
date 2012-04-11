@@ -19,52 +19,54 @@ Example
 
 Let's say you want to display to following XML on a page in a Rails project
 
-    <?xml version="1.0"?>
-    <userPosts type="array">
+~~~ xml
+<?xml version="1.0"?>
+<userPosts type="array">
+  <userPost>
+	<hidden>false</hidden>
+    <objectId>1</objectId>
+    <userObjectId>1</userObjectId>
+    <user>
+      <firstName>John</firstName>
+      <lastName>Doe</lastName>
+    </user>
+    <body>How is everybody today?</body>
+    <createdAt>2011-10-26T17:01:52+02:00</createdAt>
+
+    <replies type="array">
       <userPost>
-    	<hidden>false</hidden>
-        <objectId>1</objectId>
+        <objectId>2</objectId>
+        <parentObjectId>1</parentObjectId>
+        <userObjectId>2</userObjectId>
+        <user>
+          <firstName>Mike</firstName>
+          <lastName>Smith</lastName>
+        </user>
+        <body>I am fine, thanks for asking.</body>
+        <createdAt>2011-10-27T9:00:00+02:00</createdAt>
+      </userPost>
+      <userPost>
+        <objectId>3</objectId>
+        <parentObjectId>1</parentObjectId>
         <userObjectId>1</userObjectId>
         <user>
           <firstName>John</firstName>
           <lastName>Doe</lastName>
         </user>
-        <body>How is everybody today?</body>
-        <createdAt>2011-10-26T17:01:52+02:00</createdAt>
-
-        <replies type="array">
-          <userPost>
-            <objectId>2</objectId>
-            <parentObjectId>1</parentObjectId>
-            <userObjectId>2</userObjectId>
-            <user>
-              <firstName>Mike</firstName>
-              <lastName>Smith</lastName>
-            </user>
-            <body>I am fine, thanks for asking.</body>
-            <createdAt>2011-10-27T9:00:00+02:00</createdAt>
-          </userPost>
-          <userPost>
-            <objectId>3</objectId>
-            <parentObjectId>1</parentObjectId>
-            <userObjectId>1</userObjectId>
-            <user>
-              <firstName>John</firstName>
-              <lastName>Doe</lastName>
-            </user>
-            <body>You are more than welcome.</body>
-            <createdAt>2011-10-27T9:00:00+02:00</createdAt>
-          </userPost>
-        </replies>
+        <body>You are more than welcome.</body>
+        <createdAt>2011-10-27T9:00:00+02:00</createdAt>
       </userPost>
-      <userPost>
-        <hidden>true</hidden>
-      </userPost>
-    </userPosts>
+    </replies>
+  </userPost>
+  <userPost>
+    <hidden>true</hidden>
+  </userPost>
+</userPosts>
+~~~
 
 You start by defining a class with methods to retrieve the resource and another class to act as a mapper.
 
---- ruby
+~~~ ruby
 class Post < Ahora::Representation
   objectid :id, :user_id, :parent_id
   date  :created_at
@@ -92,24 +94,24 @@ class PostResource
     builder.use Ahora::Middleware::LastModifiedCaching, Rails.cache
   end
 end
----
+~~~
 
 Now you can define a controller as usual.
 
---- ruby
+~~~ ruby
 class PostsController < ApplicationController::Base
   def index
     @posts = PostResource.new.all
   end
 end
----
+~~~
 
 And a view template
 
---- html
+~~~ html
   <% cache @posts, 'index' %>
     <%= render(:partial => @posts) %>
   <% end >
----
+~~~
 
 And that's all there is. The XML response will be cached, so it saves a bandwith. The XML response will only be parsed if there is no existing HTML fragment cache. All cache will be invalidated when the request to posts.xml returns a new body instead of a 304 Not Modified.
