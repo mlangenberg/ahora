@@ -29,7 +29,7 @@ module Ahora
           if name.is_a? Hash
             selector, name = name.first
           end
-          element selector.to_s.camelcase(:lower) => name.to_s, :with => parser
+          element to_selector(selector.to_s.camelcase(:lower)) => name.to_s, :with => parser
         end
       end
 
@@ -63,9 +63,16 @@ module Ahora
       def time(*names)
         attribute(names, TIME_PARSER)
       end
-      
+
       def boolean(*names)
         attribute(names, BOOL_PARSER)
+      end
+
+      private
+      # Convert to XPATH selector for current node or
+      # one level deep.
+      def to_selector(name)
+        "./*/#{name}|./#{name}"
       end
     end
 

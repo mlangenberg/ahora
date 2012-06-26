@@ -113,6 +113,10 @@ describe "requesting a collection" do
       subject.user_id.must_equal 1
     end
 
+    it "returns nil for elements not in the resource" do
+      subject.parent_id.must_equal nil
+    end
+
     it "must handle date conversion" do
       subject.created_at.must_equal Date.parse("2011-10-26T17:01:52+02:00")
     end
