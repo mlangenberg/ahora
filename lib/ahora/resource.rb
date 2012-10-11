@@ -6,7 +6,6 @@ module Ahora
 
     def get(url, params = {})
       connection.get do |req|
-        set_common_headers(req)
         req.url url, params
       end
     end
@@ -14,7 +13,6 @@ module Ahora
     # FIXME test
     def post(url, body)
       connection.post do |req|
-        set_common_headers(req)
         req.url url
         req.body = body
       end
@@ -23,7 +21,6 @@ module Ahora
     # FIXME test
     def put(url, body)
       connection.put do |req|
-        set_common_headers(req)
         req.url url
         req.body = body
       end
@@ -35,12 +32,18 @@ module Ahora
         extend_middleware(builder)
         builder.adapter Faraday.default_adapter
       end
-      conn.headers['User-Agent'] = 'Ahora'
+      set_common_headers(conn.headers)
+      conn.headers.merge!(headers)
       conn
     end
 
     # @abstract override to use custom Faraday middleware
     def extend_middleware(builder); end;
+
+    # FIXME test (FakeWeb cannot test request headers)
+    # @abstract override to set custome headers
+    # returns a hash with a string for each key
+    def headers; {}; end;
 
     def collection(*args, &block)
       if args.size == 2
@@ -60,9 +63,10 @@ module Ahora
       @document_parser ||= XmlParser.method(:parse)
     end
 
-    def set_common_headers(req)
-      req.headers['Content-Type'] = 'application/xml'
-      req.headers['Accept'] = 'application/xml'
+    def set_common_headers(headers)
+      headers['User-Agent']   = 'Ahora'
+      headers['Content-Type'] = 'application/xml'
+      headers['Accept']       = 'application/xml'
     end
   end
 end
