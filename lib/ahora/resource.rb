@@ -27,14 +27,14 @@ module Ahora
     end
 
     def connection
-      conn = Faraday.new(host, :ssl => { :verify => false }) do |builder|
+      Faraday.new(host, :ssl => { :verify => false }) do |builder|
         builder.use Faraday::Response::RaiseError
         extend_middleware(builder)
         builder.adapter Faraday.default_adapter
+      end.tap do |conn|
+        set_common_headers(conn.headers)
+        conn.headers.merge!(headers)
       end
-      set_common_headers(conn.headers)
-      conn.headers.merge!(headers)
-      conn
     end
 
     # @abstract override to use custom Faraday middleware
