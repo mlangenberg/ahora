@@ -1,7 +1,10 @@
 require 'minitest/autorun'
 require 'minitest/pride'
+require 'fakeweb'
 require_relative '../test_helper'
 require_relative '../../lib/ahora/resource'
+
+FakeWeb.allow_net_connect = false
 
 class DefaultPost
   include Ahora::Resource
@@ -37,5 +40,21 @@ describe 'default headers' do
     @custom['Accept'].must_equal 'text/plain'
     @custom['Content-Type'].must_equal 'application/xml'
     @custom['X-Custom'].must_equal 'foobar'
+  end
+end
+
+describe '#put' do
+  before do
+    @post = DefaultPost.new
+  end
+
+  it "supports passing an url and a body" do
+    FakeWeb.register_uri :put, 'http://test.net/posts', :body => 'body'
+    @post.put("posts", "body").body.must_equal 'body'
+  end
+
+  it "supports passing an url and a params hash" do
+    FakeWeb.register_uri :put, 'http://test.net/posts?foo=bar', :body => 'param'
+    @post.put("posts", :foo => 'bar').body.must_equal 'param'
   end
 end

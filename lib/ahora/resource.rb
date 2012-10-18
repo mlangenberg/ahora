@@ -19,9 +19,10 @@ module Ahora
     end
 
     # FIXME test
-    def put(url, body)
+    def put(url, body_or_params)
+      body, params = body_or_params.is_a?(Hash) ? [nil, body_or_params] : [body_or_params, nil]
       connection.put do |req|
-        req.url url
+        req.url url, params
         req.body = body
       end
     end
