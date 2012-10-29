@@ -16,10 +16,13 @@ end
 
 class CustomPost < DefaultPost
   def headers
-    {
+    super.update \
       'Accept' => 'text/plain',
       'X-Custom' => 'foobar'
-    }
+  end
+
+  def extend_middleware builder
+    builder.adapter :rack
   end
 end
 
@@ -40,6 +43,20 @@ describe 'default headers' do
     @custom['Accept'].must_equal 'text/plain'
     @custom['Content-Type'].must_equal 'application/xml'
     @custom['X-Custom'].must_equal 'foobar'
+  end
+end
+
+describe 'connection adapter' do
+  it 'includes the default Faraday adapter' do
+    faraday = DefaultPost.new.connection
+    adapter = faraday.builder.handlers.last
+    adapter.klass.ancestors.must_include Faraday::Adapter
+  end
+
+  it 'can configure a custom Faraday adapter' do
+    faraday = CustomPost.new.connection
+    adapter = faraday.builder.handlers.last
+    adapter.klass.must_equal Faraday::Adapter::Rack
   end
 end
 

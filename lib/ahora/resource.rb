@@ -28,23 +28,29 @@ module Ahora
     end
 
     def connection
-      Faraday.new(host, :ssl => { :verify => false }) do |builder|
-        builder.use Faraday::Response::RaiseError
-        extend_middleware(builder)
-        builder.adapter Faraday.default_adapter
-      end.tap do |conn|
-        set_common_headers(conn.headers)
-        conn.headers.merge!(headers)
+      Faraday.new(host, connection_options) do |conn|
+        conn.use Faraday::Response::RaiseError
+        extend_middleware(conn.builder)
+        unless conn.builder.handlers.any? {|mid| mid.klass < Faraday::Adapter }
+          conn.adapter Faraday.default_adapter
+        end
       end
     end
 
     # @abstract override to use custom Faraday middleware
-    def extend_middleware(builder); end;
+    def extend_middleware(builder)
+      super if defined? super
+    end
 
     # FIXME test (FakeWeb cannot test request headers)
     # @abstract override to set custome headers
     # returns a hash with a string for each key
-    def headers; {}; end;
+    def headers
+      (defined?(super) ? super.dup : {}).update \
+        :user_agent   => 'Ahora',
+        :content_type => 'application/xml',
+        :accept       => 'application/xml'
+    end
 
     def collection(*args, &block)
       if args.size == 2
@@ -64,10 +70,9 @@ module Ahora
       @document_parser ||= XmlParser.method(:parse)
     end
 
-    def set_common_headers(headers)
-      headers['User-Agent']   = 'Ahora'
-      headers['Content-Type'] = 'application/xml'
-      headers['Accept']       = 'application/xml'
+    def connection_options
+      (defined?(super) ? super.dup : {}).update \
+        :headers => headers
     end
   end
 end
