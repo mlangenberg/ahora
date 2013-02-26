@@ -4,26 +4,24 @@ module Ahora
   module Resource
     attr_writer :document_parser
 
-    def get(url, params = {})
-      connection.get do |req|
-        req.url url, params
+    def get(url, params = nil)
+      connection.run_request(:get, url, nil, nil) do |req|
+        req.params.update(params) if params
+        yield req if block_given?
       end
     end
 
     # FIXME test
-    def post(url, body)
-      connection.post do |req|
-        req.url url
-        req.body = body
+    def post(url, body = nil)
+      connection.run_request(:post, url, body, nil) do |req|
+        yield req if block_given?
       end
     end
 
     # FIXME test
-    def put(url, body_or_params)
-      body, params = body_or_params.is_a?(Hash) ? [nil, body_or_params] : [body_or_params, nil]
-      connection.put do |req|
-        req.url url, params
-        req.body = body
+    def put(url, body = nil)
+      connection.run_request(:put, url, body, nil) do |req|
+        yield req if block_given?
       end
     end
 

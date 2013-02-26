@@ -72,6 +72,8 @@ describe '#put' do
 
   it "supports passing an url and a params hash" do
     FakeWeb.register_uri :put, 'http://test.net/posts?foo=bar', :body => 'param'
-    @post.put("posts", :foo => 'bar').body.must_equal 'param'
+    @post.put("posts") { |req|
+      req.params[:foo] = 'bar'
+    }.body.must_equal 'param'
   end
 end
