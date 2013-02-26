@@ -26,10 +26,9 @@ module Ahora
         parser = names.pop if names.last.is_a?(Proc)
         names.each do |name|
           selector = name
-          if name.is_a? Hash
-            selector, name = name.first
-          end
-          element to_selector(selector.to_s.camelcase(:lower)) => name.to_s, :with => parser
+          selector, name = name.first if name.is_a? Hash
+          selector = "./#{selector.to_s.camelcase(:lower)}"
+          element selector => name.to_s, :with => parser
         end
       end
 
@@ -69,11 +68,6 @@ module Ahora
       end
 
       private
-      # Convert to XPATH selector for current node or
-      # one level deep.
-      def to_selector(name)
-        "./*/#{name}|./#{name}"
-      end
     end
 
     extend Definition
@@ -85,7 +79,13 @@ module Ahora
           send("#{key}=", val)
         end
       else
-        super
+        doc = doc_or_atts
+        doc = XmlParser.parse(doc) unless doc.respond_to?(:search)
+        if doc.node_type == Nokogiri::XML::Node::DOCUMENT_NODE
+          # immediately scope to root element
+          doc = doc.at('/*')
+        end
+        super(doc)
       end
     end
   end
