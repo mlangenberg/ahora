@@ -32,20 +32,6 @@ module Ahora
         end
       end
 
-      # Public: define Java style object id mapping
-      #
-      # *names - Array of String or Symbol ruby style names
-      #
-      # Examples
-      #
-      # objectid :id, parent_id
-      # # is equivalent to
-      # element 'objectId' => 'id'
-      # element 'parentObjectId' => 'parent_id'
-      def objectid(*names)
-        attribute names.map { |name| { name.to_s.gsub('id', 'object_id') => name } }, INTEGER_PARSER
-      end
-
       def string(*names)
         attribute(names)
       end

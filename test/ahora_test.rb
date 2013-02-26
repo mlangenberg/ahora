@@ -42,7 +42,9 @@ class PostRepository
 end
 
 class Post < Ahora::Representation
-  objectid :id, :user_id, :parent_id
+  element './objectId' => :id, :with => lambda {|n| n.content.to_i }
+  element './userObjectId' => :user_id, :with => lambda {|n| n.content.to_i }
+  element './parentObjectId' => :parent_id, :with => lambda {|n| n.content.to_i }
   date  :created_at
   element :body
   element 'user', :with => Ahora::Representation do
