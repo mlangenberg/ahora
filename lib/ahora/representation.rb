@@ -96,13 +96,7 @@ module Ahora
       @instantiator = instantiator
       @document_parser = document_parser
       @response = response
-      @cache_key = response.env[:response_headers]['X-Ahora-Cache-Key']
       super([])
-    end
-
-    def cache_key
-      @cache_key or raise NoCacheKeyAvailable,
-          "No caching middleware is used or resource does not support caching."
     end
 
     %w( to_s to_a size each first last [] inspect pretty_print ).each do |method_name|

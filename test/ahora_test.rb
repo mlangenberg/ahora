@@ -93,10 +93,6 @@ describe "requesting a collection" do
     @posts.size.must_equal 2
   end
 
-  it "raises on #cache_key, because the backend does not has support for it" do
-    -> { @posts.cache_key }.must_raise(Ahora::Collection::NoCacheKeyAvailable)
-  end
-
   describe "a single post from the collection" do
     subject { @posts.first }
 
@@ -153,13 +149,6 @@ describe 'requesting a collection with if-modified-since support' do
 
   it "has a cache key" do
     @posts = @repository.find_by_user_id(1)
-    @posts.cache_key.
-        must_equal 'http://test.net/users/1/posts.xml:fragment_Mon, 02 Apr 2012 15:20:41 GMT'
-  end
-
-  it "has a cache key for cached response" do
-    @repository.find_by_user_id(1).cache_key.
-        must_equal @repository.find_by_user_id(1).cache_key
   end
 
   it "caches when response header includes Last-Modified" do
