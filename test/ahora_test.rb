@@ -47,11 +47,11 @@ class Post < Ahora::Representation
   element './parentObjectId' => :parent_id, :with => lambda {|n| n.content.to_i }
   date  :created_at
   element :body
-  element 'user', :with => Ahora::Representation do
+  element 'user' do
     string :first_name, :last_name
   end
   boolean :hidden
-  elements 'replies/userPost' => :replies, :with => Post
+  elements 'replies/userPost' => :replies, :with => self
 end
 
 class PostDomainRepository < PostRepository

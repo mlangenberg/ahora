@@ -54,6 +54,12 @@ module Ahora
       end
 
       private
+
+      # allows using block sub-parsers without explicitly stating they need to
+      # inherit from Ahora::Representation
+      def base_parser_class
+        Representation
+      end
     end
 
     extend Definition
