@@ -5,6 +5,7 @@ require_relative '../../lib/ahora/representation'
 
 class Employee < Ahora::Representation
   boolean :is_rockstar, :slacker, :fired
+  float :rating
 end
 
 describe "boolean elements" do
@@ -36,4 +37,13 @@ describe "boolean elements" do
   it "parsing missing value adds the correct question mark reader" do
     employee.fired?.must_equal false
   end
+end
+
+describe "float elements" do
+  let(:employee) { Employee.parse(fixture('employee').read) }
+
+  it "parses float elements" do
+    employee.rating.must_equal 7.8
+  end
+
 end

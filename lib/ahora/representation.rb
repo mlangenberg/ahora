@@ -7,6 +7,7 @@ require 'delegate'
 module Ahora
   class Representation < Nibbler
     INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
+    FLOAT_PARSER = lambda { |node| Float(node.content) if node.content.present? }
     DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
     TIME_PARSER = lambda { |node| Time.parse(node.content) if node.content.present? }
     BOOL_PARSER =
@@ -38,6 +39,10 @@ module Ahora
 
       def integer(*names)
         attribute(names, INTEGER_PARSER)
+      end
+
+      def float(*names)
+        attribute(names, FLOAT_PARSER)
       end
 
       def date(*names)

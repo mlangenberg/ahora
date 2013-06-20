@@ -3,4 +3,5 @@
 	<firstName>John</firstName>
 	<isRockstar>true</isRockstar>
 	<slacker>false</slacker>
+  <rating>7.8</rating>
 </employee>
