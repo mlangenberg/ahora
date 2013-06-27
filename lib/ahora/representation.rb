@@ -96,7 +96,7 @@ module Ahora
       super([])
     end
 
-    %w( to_s to_a size each first last [] inspect pretty_print find detect map collect inject select select! ).each do |method_name|
+    %w( to_s to_a size each first last [] inspect pretty_print find detect map collect inject select select! delete_if ).each do |method_name|
       eval "def #{method_name}(*); kicker; super; end"
     end
 
