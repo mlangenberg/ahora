@@ -26,7 +26,7 @@ module Ahora
     end
 
     def connection
-      Faraday.new(host, connection_options) do |conn|
+      Faraday.new(host.dup, connection_options) do |conn|
         conn.use Faraday::Response::RaiseError
         extend_middleware(conn.builder)
         unless conn.builder.handlers.any? {|mid| mid.klass < Faraday::Adapter }
