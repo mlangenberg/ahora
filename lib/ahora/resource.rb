@@ -4,24 +4,19 @@ module Ahora
   module Resource
     attr_writer :document_parser
 
-    def get(url, params = nil)
-      connection.run_request(:get, url, nil, nil) do |req|
-        req.params.update(params) if params
-        yield req if block_given?
-      end
-    end
-
-    # FIXME test
-    def post(url, body = nil)
-      connection.run_request(:post, url, body, nil) do |req|
-        yield req if block_given?
-      end
-    end
-
-    # FIXME test
-    def put(url, body = nil)
-      connection.run_request(:put, url, body, nil) do |req|
-        yield req if block_given?
+    # Wrap get, post and put methods to rescue from errors and create our own Ahora error instead.
+    %w(get post put).each do |method|
+      define_method "#{method}" do |*args, &block|
+        begin
+          send "do_#{method}", *args, &block
+        rescue => ex
+          case ex
+          when Faraday::Error::TimeoutError
+            raise Ahora::Error::TimeoutError.new(ex)
+          else
+            raise Ahora::Error::ClientError.new(ex)
+          end
+        end
       end
     end
 
@@ -64,6 +59,28 @@ module Ahora
     end
 
     private
+
+    def do_get(url, params = nil)
+      connection.run_request(:get, url, nil, nil) do |req|
+        req.params.update(params) if params
+        yield req if block_given?
+      end
+    end
+
+    # FIXME test
+    def do_post(url, body = nil)
+      connection.run_request(:post, url, body, nil) do |req|
+        yield req if block_given?
+      end
+    end
+
+    # FIXME test
+    def do_put(url, body = nil)
+      connection.run_request(:put, url, body, nil) do |req|
+        yield req if block_given?
+      end
+    end
+
     def document_parser
       @document_parser ||= XmlParser.method(:parse)
     end

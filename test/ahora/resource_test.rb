@@ -60,6 +60,36 @@ describe 'connection adapter' do
   end
 end
 
+describe '#get' do
+  before do
+    @post = DefaultPost.new
+  end
+
+  describe 'exception wrapping' do
+    it 'creates an Ahora::ClientError' do
+      FakeWeb.register_uri :get, 'http://test.net/posts', :body => 'Forbidden', :status => [403, 'Forbidden']
+      lambda {
+        @post.get("posts")
+      }.must_raise Ahora::Error::ClientError
+    end
+
+    it 'sets the original exception' do
+      FakeWeb.register_uri :get, 'http://test.net/posts', :body => 'Not Found', :status => [404, 'Not Found']
+      error = @post.get("posts") rescue $!
+      error.wrapped_exception.wont_be_nil
+      error.wrapped_exception.must_be_kind_of Faraday::Error::ClientError
+      error.message.must_equal error.wrapped_exception.message
+    end
+
+    it 'recognizes timeout errors' do
+      FakeWeb.register_uri :get, 'http://test.net/posts', :exception => Faraday::Error::TimeoutError
+      lambda {
+        @post.get("posts")
+      }.must_raise Ahora::Error::TimeoutError
+    end
+  end
+end
+
 describe '#put' do
   before do
     @post = DefaultPost.new
