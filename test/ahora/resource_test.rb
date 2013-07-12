@@ -83,51 +83,23 @@ describe 'exception handling' do
     @post = DefaultPost.new
   end
 
-  describe '#get' do
-    it 'should raise a TimeoutError in case of a Faraday timeout' do
-      FakeWeb.register_uri :get, 'http://test.net/posts', :exception => Faraday::Error::TimeoutError
-      lambda {
-        @post.get("posts")
-      }.must_raise Ahora::Error::TimeoutError
+  %w(get post put).each do |http_method|
+
+    describe "##{http_method}" do
+      it 'should raise a TimeoutError in case of a Faraday timeout' do
+        FakeWeb.register_uri http_method.to_sym, 'http://test.net/posts', :exception => Faraday::Error::TimeoutError
+        lambda {
+          @post.send(http_method, 'posts')
+        }.must_raise Ahora::Error::TimeoutError
+      end
+
+      it 'should raise an ClientError in case of a Faraday error' do
+        FakeWeb.register_uri http_method.to_sym, 'http://test.net/posts', :body => 'Forbidden', :status => [403, 'Forbidden']
+        lambda {
+          @post.send(http_method, 'posts')
+        }.must_raise Ahora::Error::ClientError
+      end
     end
 
-    it 'should raise an ClientError in case of a Faraday error' do
-      FakeWeb.register_uri :get, 'http://test.net/posts', :body => 'Forbidden', :status => [403, 'Forbidden']
-      lambda {
-        @post.get("posts")
-      }.must_raise Ahora::Error::ClientError
-    end
-  end
-
-  describe '#post' do
-    it 'should raise a TimeoutError in case of a Faraday timeout' do
-      FakeWeb.register_uri :post, 'http://test.net/posts', :exception => Faraday::Error::TimeoutError
-      lambda {
-        @post.post("posts")
-      }.must_raise Ahora::Error::TimeoutError
-    end
-
-    it 'should raise an ClientError in case of a Faraday error' do
-      FakeWeb.register_uri :post, 'http://test.net/posts', :body => 'Forbidden', :status => [403, 'Forbidden']
-      lambda {
-        @post.post("posts")
-      }.must_raise Ahora::Error::ClientError
-    end
-  end
-
-  describe '#put' do
-    it 'should raise a TimeoutError in case of a Faraday timeout' do
-      FakeWeb.register_uri :put, 'http://test.net/posts', :exception => Faraday::Error::TimeoutError
-      lambda {
-        @post.put("posts")
-      }.must_raise Ahora::Error::TimeoutError
-    end
-
-    it 'should raise an ClientError in case of a Faraday error' do
-      FakeWeb.register_uri :put, 'http://test.net/posts', :body => 'Forbidden', :status => [403, 'Forbidden']
-      lambda {
-        @post.put("posts")
-      }.must_raise Ahora::Error::ClientError
-    end
   end
 end
