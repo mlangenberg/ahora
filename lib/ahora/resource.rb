@@ -5,23 +5,35 @@ module Ahora
     attr_writer :document_parser
 
     def get(url, params = nil)
-      connection.run_request(:get, url, nil, nil) do |req|
-        req.params.update(params) if params
-        yield req if block_given?
+      begin
+        connection.run_request(:get, url, nil, nil) do |req|
+          req.params.update(params) if params
+          yield req if block_given?
+        end
+      rescue => e
+        handle_exception(e)
       end
     end
 
     # FIXME test
     def post(url, body = nil)
-      connection.run_request(:post, url, body, nil) do |req|
-        yield req if block_given?
+      begin
+        connection.run_request(:post, url, body, nil) do |req|
+          yield req if block_given?
+        end
+      rescue => e
+        handle_exception(e)
       end
     end
 
     # FIXME test
     def put(url, body = nil)
-      connection.run_request(:put, url, body, nil) do |req|
-        yield req if block_given?
+      begin
+        connection.run_request(:put, url, body, nil) do |req|
+          yield req if block_given?
+        end
+      rescue => e
+        handle_exception(e)
       end
     end
 
@@ -64,6 +76,7 @@ module Ahora
     end
 
     private
+
     def document_parser
       @document_parser ||= XmlParser.method(:parse)
     end
@@ -72,5 +85,16 @@ module Ahora
       (defined?(super) ? super.dup : {}).update \
         :headers => headers
     end
+
+    def handle_exception(e)
+      case e
+      when Faraday::Error::TimeoutError
+        e.extend Ahora::Error::TimeoutError
+      else
+        e.extend Ahora::Error::ClientError
+      end
+      raise
+    end
+
   end
 end
