@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   s.add_dependency "nibbler", '>= 1.3.0'
   s.add_dependency "faraday", '>= 0.7'
   s.add_dependency "nokogiri", "~> 1.5"
-  s.add_dependency "activesupport"
 
   s.add_development_dependency "fakeweb"
   s.add_development_dependency "minitest"

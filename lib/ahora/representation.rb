@@ -2,17 +2,17 @@ require 'nibbler'
 require 'nokogiri'
 require 'time'
 require 'date'
-require 'active_support/core_ext/string'
 require 'delegate'
 
 module Ahora
   class Representation < Nibbler
-    INTEGER_PARSER = lambda { |node| Integer(node.content) if node.content.present? }
-    FLOAT_PARSER = lambda { |node| Float(node.content) if node.content.present? }
-    DATE_PARSER = lambda { |node| Date.parse(node.content) if node.content.present? }
-    TIME_PARSER = lambda { |node| Time.parse(node.content) if node.content.present? }
-    BOOL_PARSER =
-        lambda { |node| node.content.to_s.downcase == 'true' if node.content.present? }
+    present = lambda { |obj| obj && !obj.empty? }
+
+    INTEGER_PARSER = lambda { |node| Integer(node.content) if present === node.content }
+    FLOAT_PARSER = lambda { |node| Float(node.content) if present === node.content }
+    DATE_PARSER = lambda { |node| Date.parse(node.content) if present === node.content }
+    TIME_PARSER = lambda { |node| Time.parse(node.content) if present === node.content }
+    BOOL_PARSER = lambda { |node| node.content.to_s.downcase == 'true' }
 
     module Definition
       def element(*)
