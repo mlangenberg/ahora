@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = ""
   s.summary     = %q{Consume Java-ish XML HTTP Resources easily}
   s.description = %q{Consume Java-ish XML HTTP Resources easily}
+  s.license     = 'MIT'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test}/*`.split("\n")
