@@ -27,11 +27,18 @@ module Ahora
         names = names.flatten
         parser = names.pop if names.last.is_a?(Proc)
         names.each do |name|
-          selector = name
-          selector, name = name.first if name.is_a? Hash
-          selector = "./#{selector.to_s.camelcase(:lower)}"
+          if Hash === name
+            selector, name = name.first
+          else
+            selector = attribute_selector(name)
+          end
           element selector => name.to_s, :with => parser
         end
+      end
+
+      # override in subclasses for e.g. camelCase support
+      def attribute_selector(name)
+        name.to_s
       end
 
       def string(*names)

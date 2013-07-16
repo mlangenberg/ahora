@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <employee>
-	<firstName>John</firstName>
-	<isRockstar>true</isRockstar>
+	<first_name>John</first_name>
+	<is_rockstar>true</is_rockstar>
 	<slacker>false</slacker>
   <rating>7.8</rating>
 </employee>

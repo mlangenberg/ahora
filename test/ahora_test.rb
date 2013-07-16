@@ -42,6 +42,14 @@ class PostRepository
 end
 
 class Post < Ahora::Representation
+  def self.attribute_selector(name)
+    "./#{name.to_s.gsub(/_([a-z])/){ $1.upcase }}"
+  end
+
+  def self.base_parser_class
+    Post
+  end
+
   element './objectId' => :id, :with => lambda {|n| n.content.to_i }
   element './userObjectId' => :user_id, :with => lambda {|n| n.content.to_i }
   element './parentObjectId' => :parent_id, :with => lambda {|n| n.content.to_i }
