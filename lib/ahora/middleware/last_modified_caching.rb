@@ -1,3 +1,5 @@
+require 'time'
+
 module Ahora
   module Middleware
     class LastModifiedCaching < Faraday::Middleware
