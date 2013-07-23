@@ -95,28 +95,16 @@ module Ahora
     end
   end
 
-  class Collection < DelegateClass(Array)
-    NoCacheKeyAvailable = Class.new(StandardError)
-    def initialize(instantiator, document_parser, response)
-      @instantiator = instantiator
-      @document_parser = document_parser
-      @response = response
-      super([])
-    end
+  module Collection
+    class << self
+      def instantiate(instantiator, document_parser, response)
+        document_parser.call(response.body).search("/*[@type='array']/*").map { |element|
+          instantiator.call element
+        }.to_a.compact
+      end
 
-    %w( to_s to_a size each first last [] inspect pretty_print find detect map collect inject select select! delete_if ).each do |method_name|
-      eval "def #{method_name}(*); kicker; super; end"
-    end
-
-    private
-    def kicker
-      @_collection ||= __setobj__ doc.search("/*[@type='array']/*").map { |element|
-        @instantiator.call element
-      }.to_a.compact
-    end
-
-    def doc
-      @document_parser.call(@response.body)
+      # return simple Array object instead of proxy
+      alias :new :instantiate
     end
   end
 
