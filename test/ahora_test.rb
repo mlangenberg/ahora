@@ -31,6 +31,10 @@ class PostRepository
     collection Post, get("/users/#{id}/posts.xml")
   end
 
+  def find_by_user_id_and_post_id(user_id, id)
+    single PostDomain, get("/users/#{user_id}/posts/#{id}.xml")
+  end
+
   def extend_middleware(builder)
     builder.use Faraday::Request::BasicAuthentication, USERNAME, PASSWORD
     builder.use Ahora::Middleware::LastModifiedCaching, MemCache.instance
@@ -148,6 +152,20 @@ describe "requesting a collection" do
   end
 end
 
+describe 'requesting a single resource' do
+  before do
+    fake_http '/users/1/posts/2.xml', fixture('user_post')
+    @post = PostRepository.new.find_by_user_id_and_post_id(1, 2)
+  end
+
+  subject { @post }
+
+  it "has the right body" do
+    subject.body.must_equal "When will world see Baby Cambridge?"
+  end
+
+end
+
 describe 'requesting a collection with if-modified-since support' do
   before do
     FakeWeb.register_uri :get, uri('/users/1/posts.xml'), [
@@ -215,3 +233,5 @@ describe "passing a block instead of a class to collection" do
     repository.all.first.id.must_equal 1
   end
 end
+
+

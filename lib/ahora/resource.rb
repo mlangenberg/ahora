@@ -63,6 +63,18 @@ module Ahora
     end
 
     def collection(*args, &block)
+      instantiator, response = extract_parser_from_args(*args, &block)
+      Collection.new instantiator, document_parser, response
+    end
+
+    def single(*args, &block)
+      instantiator, response = extract_parser_from_args(*args, &block)
+      Single.new instantiator, document_parser, response
+    end
+
+    private
+
+    def extract_parser_from_args(*args, &block)
       if args.size == 2
         klass, response = args
         instantiator = lambda do |doc|
@@ -72,10 +84,8 @@ module Ahora
         response = args.first
         instantiator = block
       end
-      Collection.new instantiator, document_parser, response
+      [instantiator, response]
     end
-
-    private
 
     def document_parser
       @document_parser ||= XmlParser.method(:parse)

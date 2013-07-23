@@ -96,15 +96,16 @@ module Ahora
   end
 
   module Collection
-    class << self
-      def instantiate(instantiator, document_parser, response)
-        document_parser.call(response.body).search("/*[@type='array']/*").map { |element|
-          instantiator.call element
-        }.to_a.compact
-      end
+    def self.new(instantiator, document_parser, response)
+      document_parser.call(response.body).search("/*[@type='array']/*").map { |element|
+        instantiator.call element
+      }.to_a.compact
+    end
+  end
 
-      # return simple Array object instead of proxy
-      alias :new :instantiate
+  module Single
+    def self.new(instantiator, document_parser, response)
+      instantiator.call document_parser.call(response.body)
     end
   end
 
