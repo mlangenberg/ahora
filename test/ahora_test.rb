@@ -107,6 +107,10 @@ describe "requesting a collection" do
     @posts.size.must_equal 2
   end
 
+  it "has a cache key" do
+    @posts.cache_key.must_equal 'http://test.net/users/1/posts.xml/7f07ef1077c7b609fd1a34b482e0ef85'
+  end
+
   describe "a single post from the collection" do
     subject { @posts.first }
 

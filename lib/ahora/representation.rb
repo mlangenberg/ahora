@@ -95,24 +95,29 @@ module Ahora
     end
   end
 
-  module Collection
-    def self.new(instantiator, document_parser, response)
-      document_parser.call(response.body).search("/*[@type='array']/*").map { |element|
-        instantiator.call element
-      }.to_a.compact
-    end
-  end
-
   class Response < DelegateClass(Ahora::Representation)
     def initialize(instantiator, document_parser, response)
+      @instantiator = instantiator
+      @document_parser = document_parser
       @response = response
-      target = instantiator.call document_parser.call(@response.body)
       super(target)
+    end
+
+    def target
+      @instantiator.call @document_parser.call(@response.body)
     end
 
     # does this take Host header into account?
     def cache_key
       "#{@response.env[:url].normalize.to_s}/#{Digest::MD5.hexdigest(@response.body)}"
+    end
+  end
+
+  class Collection < Response
+    def target
+      @document_parser.call(@response.body).search("/*[@type='array']/*").map { |element|
+        @instantiator.call element
+      }.to_a.compact
     end
   end
 
