@@ -164,6 +164,10 @@ describe 'requesting a single resource' do
     subject.body.must_equal "When will world see Baby Cambridge?"
   end
 
+  it "has a cache key" do
+    subject.cache_key.must_equal 'http://test.net/users/1/posts/2.xml/b4cc33ff2af22a03cc7d4cbbc1666c18'
+  end
+
 end
 
 describe 'requesting a collection with if-modified-since support' do

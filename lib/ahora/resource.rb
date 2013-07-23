@@ -69,7 +69,7 @@ module Ahora
 
     def single(*args, &block)
       instantiator, response = extract_parser_from_args(*args, &block)
-      Single.new instantiator, document_parser, response
+      Response.new instantiator, document_parser, response
     end
 
     private
