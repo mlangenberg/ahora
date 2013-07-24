@@ -107,9 +107,10 @@ module Ahora
       @instantiator.call @document_parser.call(@response.body)
     end
 
-    # does this take Host header into account?
     def cache_key
-      "#{@response.env[:url].normalize.to_s}/#{Digest::MD5.hexdigest(@response.body)}"
+      uri = @response.env[:url].dup
+      uri.host = @response.env['HTTP_HOST'] if @response.env['HTTP_HOST']
+      "#{uri.normalize}/#{Digest::MD5.hexdigest(@response.body)}"
     end
   end
 
