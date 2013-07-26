@@ -3,6 +3,7 @@ require 'nokogiri'
 require 'time'
 require 'date'
 require 'delegate'
+require 'digest/sha1'
 
 module Ahora
   class Representation < Nibbler
@@ -110,7 +111,7 @@ module Ahora
     def cache_key
       uri = @response.env[:url].dup
       uri.host = @response.env['HTTP_HOST'] if @response.env['HTTP_HOST']
-      "#{uri.normalize}/#{Digest::MD5.hexdigest(@response.body)}"
+      "#{Digest::SHA1.hexdigest(uri.normalize.to_s)}/#{Digest::SHA1.hexdigest(@response.body)}"
     end
   end
 
