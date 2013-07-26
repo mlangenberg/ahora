@@ -108,7 +108,7 @@ describe "requesting a collection" do
   end
 
   it "has a cache key" do
-    @posts.cache_key.must_equal 'http://test.net/users/1/posts.xml/7f07ef1077c7b609fd1a34b482e0ef85'
+    @posts.cache_key.must_equal 'd630281e7b240892745b975d6b3ff9abe4fb3064/c7244914c7109201527c1b59930b64d242eca842'
   end
 
   describe "a single post from the collection" do
@@ -169,7 +169,7 @@ describe 'requesting a single resource' do
   end
 
   it "has a cache key" do
-    subject.cache_key.must_equal 'http://test.net/users/1/posts/2.xml/b4cc33ff2af22a03cc7d4cbbc1666c18'
+    subject.cache_key.must_equal 'd2c6c472195a1f74b8271c5e7ced007cf9b2821e/c9e3c5a555a38cc7f99c3cdada0e5ec02341c674'
   end
 
 end
