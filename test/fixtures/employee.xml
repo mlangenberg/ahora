@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <employee>
 	<first_name>John</first_name>
+  <last_name />
 	<is_rockstar>true</is_rockstar>
 	<slacker>false</slacker>
   <rating>7.8</rating>

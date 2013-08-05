@@ -9,11 +9,12 @@ module Ahora
   class Representation < Nibbler
     present = lambda { |obj| obj && !obj.empty? }
 
-    INTEGER_PARSER = lambda { |node| Integer(node.content) if present.call(node.content) }
-    FLOAT_PARSER = lambda { |node| Float(node.content) if present.call(node.content) }
-    DATE_PARSER = lambda { |node| Date.parse(node.content) if present.call(node.content) }
-    TIME_PARSER = lambda { |node| Time.parse(node.content) if present.call(node.content) }
-    BOOL_PARSER = lambda { |node| node.content.to_s.downcase == 'true' }
+    STRING_PARSER  = lambda { |node| node.content             if present.call(node.content) }
+    INTEGER_PARSER = lambda { |node| Integer(node.content)    if present.call(node.content) }
+    FLOAT_PARSER   = lambda { |node| Float(node.content)      if present.call(node.content) }
+    DATE_PARSER    = lambda { |node| Date.parse(node.content) if present.call(node.content) }
+    TIME_PARSER    = lambda { |node| Time.parse(node.content) if present.call(node.content) }
+    BOOL_PARSER    = lambda { |node| node.content.to_s.downcase == 'true' }
 
     module Definition
       def element(*)
@@ -43,7 +44,7 @@ module Ahora
       end
 
       def string(*names)
-        attribute(names)
+        attribute(names, STRING_PARSER)
       end
 
       def integer(*names)

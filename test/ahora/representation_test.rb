@@ -4,6 +4,7 @@ require_relative '../test_helper'
 require_relative '../../lib/ahora/representation'
 
 class Employee < Ahora::Representation
+  string :first_name, :last_name
   boolean :is_rockstar, :slacker, :fired
   float :rating
 end
@@ -45,5 +46,16 @@ describe "float elements" do
   it "parses float elements" do
     employee.rating.must_equal 7.8
   end
+end
 
+describe "string elements" do
+  let(:employee) { Employee.parse(fixture('employee').read) }
+
+  it "returns regular strings" do
+    employee.first_name.must_equal 'John'
+  end
+
+  it "returns nil for empty strings" do
+    employee.last_name.must_equal nil
+  end
 end
