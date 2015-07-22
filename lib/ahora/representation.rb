@@ -81,7 +81,7 @@ module Ahora
 
     def initialize(doc_or_atts = {})
       if doc_or_atts.is_a? Hash
-        super(nil)
+        super("")
         doc_or_atts.each do |key, val|
           send("#{key}=", val)
         end
