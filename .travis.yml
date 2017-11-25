@@ -1,5 +1,5 @@
 language: ruby
 rvm:
   - 2.4
-  - jruby
-  - rubinius
+  - jruby-head
+  - rbx-3
