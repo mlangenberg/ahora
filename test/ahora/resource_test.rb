@@ -93,6 +93,13 @@ describe 'exception handling' do
         }.must_raise Ahora::Error::TimeoutError
       end
 
+      it 'should raise a TimeoutError in case of a Faraday connection failed' do
+        FakeWeb.register_uri http_method.to_sym, 'http://test.net/posts', :exception => Faraday::Error::ConnectionFailed
+        lambda {
+          @post.send(http_method, 'posts')
+        }.must_raise Ahora::Error::TimeoutError
+      end
+
       it 'should raise an ClientError in case of a Faraday error' do
         FakeWeb.register_uri http_method.to_sym, 'http://test.net/posts', :body => 'Forbidden', :status => [403, 'Forbidden']
         lambda {
