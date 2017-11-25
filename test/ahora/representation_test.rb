@@ -24,7 +24,7 @@ describe "boolean elements" do
   end
 
   it "parsing missing value adds the correct reader" do
-    employee.fired.must_equal nil
+    employee.fired.must_be_nil
   end
 
   it "parsing 'true' adds the correct question mark reader" do
@@ -56,6 +56,6 @@ describe "string elements" do
   end
 
   it "returns nil for empty strings" do
-    employee.last_name.must_equal nil
+    employee.last_name.must_be_nil
   end
 end

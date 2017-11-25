@@ -128,7 +128,7 @@ describe "requesting a collection" do
     end
 
     it "returns nil for elements not in the resource" do
-      subject.parent_id.must_equal nil
+      subject.parent_id.must_be_nil
     end
 
     it "must handle date conversion" do
