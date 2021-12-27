@@ -98,7 +98,7 @@ module Ahora
 
     def handle_exception(e)
       case e
-      when Faraday::Error::TimeoutError, Faraday::Error::ConnectionFailed
+      when Faraday::TimeoutError, Faraday::ConnectionFailed
         e.extend Ahora::Error::TimeoutError
       else
         e.extend Ahora::Error::ClientError
